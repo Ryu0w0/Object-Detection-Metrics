@@ -3,7 +3,8 @@
 
 ### Python ###
 .idea/
-
+detections/*
+groundtruths/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
