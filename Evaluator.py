@@ -100,18 +100,28 @@ class Evaluator:
                 # print('dect %s => %s' % (dects[d][0], dects[d][3],))
                 # Find ground truth image
                 gt = [gt for gt in gts if gt[0] == dects[d][0]]
-                iouMax = sys.float_info.min
+                # iouMax = sys.float_info.min
+                distMin = 999999999999
+                has_center = False
                 for j in range(len(gt)):
                     # print('Ground truth gt => %s' % (gt[j][3],))
                     iou = Evaluator.iou(dects[d][3], gt[j][3])
-                    if iou > iouMax:
-                        iouMax = iou
-                        jmax = j
+                    pred_box = dects[d][3]
+                    gt_box = gt[j][3]
+                    is_center, distance = Evaluator.is_pred_center_within_gt_box(pred_box, gt_box)
+                    if is_center:
+                        if distMin > distance:
+                            distMin = distance
+                            has_center = True
+                            jmin = j
+                    # if iou > iouMax:
+                    #     iouMax = iou
+                    #     jmax = j
                 # Assign detection as true positive/don't care/false positive
-                if iouMax >= IOUThreshold:
-                    if det[dects[d][0]][jmax] == 0:
+                if has_center:
+                    if det[dects[d][0]][jmin] == 0:
                         TP[d] = 1  # count as true positive
-                        det[dects[d][0]][jmax] = 1  # flag as already 'seen'
+                        det[dects[d][0]][jmin] = 1  # flag as already 'seen'
                         # print("TP")
                     else:
                         FP[d] = 1  # count as false positive
@@ -377,6 +387,23 @@ class Evaluator:
         # cv2.waitKey(0)
         # cv2.destroyWindow("comparing")
         return sorted(ret, key=lambda i: i[0], reverse=True)  # sort by iou (from highest to lowest)
+
+    @staticmethod
+    def is_pred_center_within_gt_box(pred_box, gt_box):
+        # File: left, bottom, w, h
+        # Box here: left, bottom, right, top
+        p_left, p_bottom, p_right, p_top = pred_box
+        p_center_x = p_left + (p_right - p_left) / 2
+        p_center_y = p_bottom + (p_top - p_bottom) / 2
+        gt_left, gt_bottom, gt_right, gt_top = gt_box
+        gt_center_x = gt_left + (gt_right - gt_left) / 2
+        gt_center_y = gt_bottom + (gt_top - gt_bottom) / 2
+
+        if (p_center_x >= gt_left) & (p_center_x <= gt_right) & (p_center_y >= gt_bottom) & (p_center_y <= gt_top):
+            distance = np.linalg.norm(np.array([p_center_x, p_center_y]) - np.array([gt_center_x, gt_center_y]))
+            return True, distance
+        else:
+            return False, None
 
     @staticmethod
     def iou(boxA, boxB):
