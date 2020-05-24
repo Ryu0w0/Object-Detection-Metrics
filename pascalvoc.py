@@ -17,6 +17,8 @@ import shutil
 # from argparse import RawTextHelpFormatter
 import sys
 
+import pandas as pd
+
 import _init_paths
 from BoundingBox import BoundingBox
 from BoundingBoxes import BoundingBoxes
@@ -334,6 +336,15 @@ f = open(os.path.join(savePath, 'results.txt'), 'w')
 f.write('Object Detection Metrics\n')
 f.write('https://github.com/rafaelpadilla/Object-Detection-Metrics\n\n\n')
 f.write('Average Precision (AP), Precision and Recall per class:')
+
+cl_list = []
+ap_list = []
+for metricsPerClass in detections:
+    cl = metricsPerClass['class']
+    ap = metricsPerClass['AP']
+    cl_list.append(cl)
+    ap_list.append(ap)
+pd.DataFrame({"class": cl_list, "AP": ap_list}).to_csv(f"./test.csv")
 
 # each detection is a class
 for metricsPerClass in detections:

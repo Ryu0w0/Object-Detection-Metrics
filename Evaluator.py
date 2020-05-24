@@ -105,7 +105,6 @@ class Evaluator:
                 has_center = False
                 for j in range(len(gt)):
                     # print('Ground truth gt => %s' % (gt[j][3],))
-                    iou = Evaluator.iou(dects[d][3], gt[j][3])
                     pred_box = dects[d][3]
                     gt_box = gt[j][3]
                     is_center, distance = Evaluator.is_pred_center_within_gt_box(pred_box, gt_box)
@@ -162,7 +161,7 @@ class Evaluator:
                                  showAP=False,
                                  showInterpolatedPrecision=False,
                                  savePath=None,
-                                 showGraphic=True):
+                                 showGraphic=False):
         """PlotPrecisionRecallCurve
         Plot the Precision x Recall curve for a given class.
         Args:
@@ -291,11 +290,13 @@ class Evaluator:
             #                 arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),
             #                 bbox=box)
             if savePath is not None:
-                plt.savefig(os.path.join(savePath, classId + '.png'))
+                # plt.savefig(os.path.join(savePath, classId + '.png'))
+                pass
             if showGraphic is True:
-                plt.show()
+                pass
+                # plt.show()
                 # plt.waitforbuttonpress()
-                plt.pause(0.05)
+                # plt.pause(0.05)
         return results
 
     @staticmethod
